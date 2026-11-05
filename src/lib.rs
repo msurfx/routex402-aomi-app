@@ -124,13 +124,25 @@ pub fn vetting_checks(a: &Agent, now: i64) -> Vec<Check> {
         (Status::Unknown, "Too little history to judge".to_string())
     };
     let buyers = Check { id: "buyer-independence", label: "Buyer independence", status: bstatus, detail: bdetail };
+    let expected = a.price as f64 * c as f64;
+    let volume = if a.price == 0 || c == 0 {
+        Check { id: "volume", label: "Volume consistency", status: Status::Unknown, detail: "Not enough data to compare".into() }
+    } else {
+        let drift = (a.total_volume as f64 - expected).abs() / expected;
+        Check {
+            id: "volume",
+            label: "Volume consistency",
+            status: if drift <= 0.05 { Status::Pass } else { Status::Caution },
+            detail: format!("Volume is within {:.1}% of price x payments", drift * 100.0),
+        }
+    };
     let recency = Check {
         id: "recency",
         label: "Recent activity",
         status: if age_days <= 7.0 { Status::Pass } else if age_days <= 30.0 { Status::Caution } else { Status::Fail },
         detail: format!("Last update {} days ago", age_days.floor() as i64),
     };
-    vec![track, success, buyers, recency]
+    vec![track, success, buyers, volume, recency]
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -341,6 +353,19 @@ mod tests {
         let a = agent(95, 30, 0, 8, 0);
         let c = vetting_checks(&a, 120 * 86400);
         assert_eq!(c.iter().find(|x| x.id == "recency").unwrap().status, Status::Fail);
+    }
+
+    #[test]
+    fn returns_five_checks_and_flags_volume_drift() {
+        let mut a = agent(95, 30, 0, 8, 1000);
+        a.price = 10000;
+        a.total_volume = 300000;
+        let c = vetting_checks(&a, 1000);
+        assert_eq!(c.len(), 5);
+        assert_eq!(c.iter().find(|x| x.id == "volume").unwrap().status, Status::Pass);
+        a.total_volume = 100000;
+        let c = vetting_checks(&a, 1000);
+        assert_eq!(c.iter().find(|x| x.id == "volume").unwrap().status, Status::Caution);
     }
 
     #[test]
