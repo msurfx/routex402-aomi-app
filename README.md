@@ -1,117 +1,46 @@
-# jrussdev — localswebbuilds.xyz
+# Routex402 Aomi App
 
-Single-file landing page for the jrussdev freelance web development brand.
+A **read-only** Aomi App that lets an agent check a seller's verified payment reputation **before paying**.
 
----
+Routex402 records payment reputation for AI agents on Solana. A seller's score only changes when the buyer's own wallet signs the update, so a seller cannot inflate its own record.
 
-## Files
+> Independent project. Not an Aomi product; no partnership is implied. Solana **devnet** data only.
 
-| File | Purpose |
-|------|---------|
-| `index.html` | The entire site — HTML, CSS, and JS in one file |
+## Tools
 
----
+| Tool | Purpose |
+| --- | --- |
+| `check_agent_reputation(seller, policy?)` | Looks up a seller by profile pubkey or payout address. Returns score, tier, confidence, vetting checks and a `proceed` / `do_not_pay` recommendation with reasons. `policy` is `standard` (default) or `strict`. |
+| `list_top_agents(limit?)` | Lists sellers ranked by reputation (default 5, max 20). |
 
-## Quick start
+The App requests **no host namespaces**: no wallet access and no signing. It cannot move funds.
 
-1. Download `index.html`
-2. Upload it to your hosting (Cloudflare Pages, Netlify, or any static host)
-3. Point your domain `localswebbuilds.xyz` to the host
-4. Complete the two steps below before going live
+## Policies
 
----
+- **standard**: reputation of 80 or more, and buyer independence must not fail (a high score built on one buyer is blocked).
+- **strict**: standard, plus confidence of Medium or High.
 
-## Setup checklist
+## Data source
 
-### 1. Formspree (contact form)
+Reads `GET https://route402-seller.onrender.com/agents`. The host runs on a free tier and can take up to ~50 seconds to respond after idling, so the client timeout is 70 seconds.
 
-1. Go to [formspree.io](https://formspree.io) and create a free account
-2. Create a new form and copy your endpoint URL (looks like `https://formspree.io/f/abcd1234`)
-3. Open `index.html` and find the `CONFIG` block near the bottom of the `<script>` tag:
+## Build and test
 
-```js
-const CONFIG = {
-  FORMSPREE_ENDPOINT: 'https://formspree.io/f/YOUR_FORM_ID', // replace this
-  REXDEV_EMAIL:       'hello@localswebbuilds.xyz',
-};
+```bash
+cargo test
+cargo build --release
 ```
 
-Replace `YOUR_FORM_ID` with your actual ID.
+Requires Rust 1.85+. `aomi-sdk` is pinned exactly (`=7.0.0`) as the Aomi build tooling requires.
 
----
+## Status
 
-### 2. Portfolio entries
+- Compiles and passes unit tests (vetting logic, policy decisions, JSON parsing).
+- Not yet deployed to the Aomi platform.
+- Unverified: whether App tools may make outbound HTTPS calls from the Aomi runtime, and tool timeout limits.
 
-Find the `PORTFOLIO` array in the `<script>` block:
+## Links
 
-```js
-const PORTFOLIO = [
-  {
-    name:        'Example Business 1',
-    type:        'Local business',
-    url:         'https://example.com',      // replace with real URL
-    description: 'Placeholder description.',  // replace with real description
-  },
-  // ...
-];
-```
-
-- Replace `url` with the live URL of your client's site
-- Screenshots load **automatically** via [thum.io](https://thum.io) — no image uploads needed
-- Add or remove objects in the array to change the number of cards
-
----
-
-## Email routing
-
-Already configured via Cloudflare Email Routing:
-- `hello@localswebbuilds.xyz` forwards to `easybuildweb3@gmail.com`
-
-No changes needed in the HTML — the email address is already set correctly.
-
----
-
-## Deployment options
-
-| Host | Free tier | Custom domain | Notes |
-|------|-----------|--------------|-------|
-| [Cloudflare Pages](https://pages.cloudflare.com) | Yes | Yes | Best option — integrates with your existing Cloudflare setup |
-| [Netlify](https://netlify.com) | Yes | Yes | Drag-and-drop deploy |
-| [GitHub Pages](https://pages.github.com) | Yes | Yes | Push to repo and enable Pages |
-
-### Cloudflare Pages (recommended)
-
-1. Cloudflare Dashboard → Pages → Create a project
-2. Choose "Direct Upload"
-3. Upload `index.html`
-4. Connect your custom domain `localswebbuilds.xyz`
-
----
-
-## Customisation reference
-
-All key config is near the bottom of the `<script>` block:
-
-```js
-const CONFIG = { ... };   // Formspree endpoint + contact email
-const PORTFOLIO = [ ... ]; // Portfolio cards
-```
-
-Colours are CSS variables at the top of the `<style>` block:
-
-```css
-:root {
-  --primary:  #1e293b;   /* deep slate */
-  --accent:   #3b82f6;   /* blue — buttons, highlights */
-}
-```
-
----
-
-## Fonts
-
-Uses **Plus Jakarta Sans** via Google Fonts — loads automatically online. A fallback sans-serif shows when previewing offline; that's expected.
-
----
-
-*Built by jrussdev · hello@localswebbuilds.xyz*
+- Live demo: https://routex402.xyz/demo.html
+- Integration notes: https://routex402.xyz/integrate.html
+- Program (devnet): https://solscan.io/account/6pp5jDS23FBcwtqe8pTiBJw3osyHZQPENr9bK3P62vjt?cluster=devnet
