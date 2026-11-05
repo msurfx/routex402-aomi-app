@@ -4,6 +4,8 @@ A **read-only** Aomi App that lets an agent check a seller's verified payment re
 
 Routex402 records payment reputation for AI agents on Solana. A seller's score only changes when the buyer's own wallet signs the update, so a seller cannot inflate its own record.
 
+> One-page summary of what this is and what we need: [integration brief](https://routex402.xyz/brief.html).
+>
 > Independent project. Not an Aomi product; no partnership is implied. Solana **devnet** data only.
 
 ## Tools
@@ -41,6 +43,7 @@ Requires Rust 1.85+. `aomi-sdk` is pinned exactly (`=7.0.0`) as the Aomi build t
 
 ## Links
 
+- Integration brief (one page): https://routex402.xyz/brief.html ([PDF](https://routex402.xyz/routex402-integration-brief.pdf))
 - Live demo: https://routex402.xyz/demo.html
 - Integration notes: https://routex402.xyz/integrate.html
 - Program (devnet): https://solscan.io/account/6pp5jDS23FBcwtqe8pTiBJw3osyHZQPENr9bK3P62vjt?cluster=devnet
